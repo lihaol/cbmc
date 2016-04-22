@@ -59,8 +59,8 @@ void memory_model_interruptt::read_from(symex_target_equationt &equation)
       c_it!=choice_symbols.end();
       c_it++)
   {
-    event_it r=c_it->first.first;
-    event_it w=c_it->first.second;
+    const event_it r=c_it->first.first;
+    const event_it w=c_it->first.second;
 
     assert(!po(r, w));
 
@@ -97,9 +97,9 @@ void memory_model_interruptt::write_serialization_external(
       c_it!=ww_pair_symbols.end();
       c_it++)
   {
-    symbol_exprt s=c_it->second;
-    event_it w1 = c_it->first.first;
-    event_it w2 = c_it->first.second;
+    const symbol_exprt &s=c_it->second;
+    const event_it w1 = c_it->first.first;
+    const event_it w2 = c_it->first.second;
 
     if(w1->source.priority>=
        w2->source.priority)
@@ -145,10 +145,10 @@ void memory_model_interruptt::from_read(symex_target_equationt &equation)
       ww_pair_it!=ww_pairs.end();
       ++ww_pair_it) 
   {
-    event_it w_prime=ww_pair_it->first.first; 
-    event_it w=ww_pair_it->first.second;
-    exprt ws1=ww_pair_it->second.first;
-    exprt ws2=ww_pair_it->second.second;
+    const event_it w_prime=ww_pair_it->first.first; 
+    const event_it w=ww_pair_it->first.second;
+    const exprt &ws1=ww_pair_it->second.first;
+    const exprt &ws2=ww_pair_it->second.second;
      
     // smells like cubic
     for(choice_symbolst::const_iterator
@@ -156,8 +156,8 @@ void memory_model_interruptt::from_read(symex_target_equationt &equation)
         c_it!=choice_symbols.end();
         c_it++)
     {
-      event_it r=c_it->first.first;
-      exprt rf=c_it->second;
+      const event_it r=c_it->first.first;
+      const exprt &rf=c_it->second;
       exprt cond;
       cond.make_nil();
     
