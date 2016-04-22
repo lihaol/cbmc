@@ -98,8 +98,8 @@ void memory_model_interruptt::write_serialization_external(
       c_it++)
   {
     const symbol_exprt &s=c_it->second;
-    const event_it w1 = c_it->first.first;
-    const event_it w2 = c_it->first.second;
+    const event_it w1=c_it->first.first;
+    const event_it w2=c_it->first.second;
 
     if(w1->source.priority>=
        w2->source.priority)
