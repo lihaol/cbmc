@@ -93,9 +93,9 @@ void memory_model_interruptt::write_serialization_external(
   memory_model_sct::write_serialization_external(equation);
 
   for(choice_symbolst::const_iterator
-           c_it=ww_pair_symbols.begin();
-           c_it!=ww_pair_symbols.end();
-           c_it++)
+      c_it=ww_pair_symbols.begin();
+      c_it!=ww_pair_symbols.end();
+      c_it++)
   {
     symbol_exprt s=c_it->second;
     event_it w1 = c_it->first.first;
