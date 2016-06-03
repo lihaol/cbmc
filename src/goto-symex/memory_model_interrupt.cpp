@@ -68,7 +68,8 @@ void memory_model_interruptt::read_from(symex_target_equationt &equation)
        w->source.priority>=r->source.priority)
     { 
       // must use before(w, r) instead of c_it->second 
-      exprt cond=implies_exprt(before(w, r), last(w, r));
+      exprt cond=implies_exprt(
+        and_exprt(before(w, r), w->guard, r->guard), last(w, r));
       add_constraint(
         equation, cond, "rf-irq", r->source);
     }
