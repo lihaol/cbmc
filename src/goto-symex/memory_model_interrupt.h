@@ -25,6 +25,7 @@ protected:
   void read_from(symex_target_equationt &equation);
   void from_read(symex_target_equationt &equation);
   void write_serialization_external(symex_target_equationt &equation);
+  void nested_isr_for_external_reads(symex_target_equationt &equation);
 
 private:
   per_thread_mapt per_thread_map;

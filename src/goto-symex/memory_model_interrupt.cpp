@@ -36,6 +36,7 @@ void memory_model_interruptt::operator()(symex_target_equationt &equation)
   read_from(equation);
   write_serialization_external(equation);
   from_read(equation);
+  nested_isr_for_external_reads(equation);
 }
 
 /*******************************************************************\
@@ -189,6 +190,74 @@ void memory_model_interruptt::from_read(symex_target_equationt &equation)
 
       if(cond.is_not_nil())
         add_constraint(equation, cond, "fr-irq", r->source);
+    }
+  }
+}
+
+/*******************************************************************\
+
+Function: memory_model_interruptt::nested_isr_for_external_reads
+
+  Inputs:
+
+ Outputs:
+
+ Purpose:
+
+\*******************************************************************/
+
+void memory_model_interruptt::nested_isr_for_external_reads(
+  symex_target_equationt &equation) 
+{
+  for(address_mapt::const_iterator
+      a_it=address_map.begin();
+      a_it!=address_map.end();
+      a_it++)
+  {
+    const a_rect &a_rec=a_it->second;
+
+    // This is quadratic in the number of reads per address.
+    for(event_listt::const_iterator
+        r_it1=a_rec.reads.begin();
+        r_it1!=a_rec.reads.end();
+        ++r_it1)
+    {
+      event_listt::const_iterator next=r_it1;
+      ++next;
+
+      for(event_listt::const_iterator r_it2=next;
+          r_it2!=a_rec.reads.end();
+          ++r_it2)
+      {
+        // external?
+        if((*r_it1)->source.thread_nr==
+           (*r_it2)->source.thread_nr)
+          continue;
+
+        const event_it r1=*r_it1;
+        const event_it r2=*r_it2;
+     
+
+	if(r1->source.priority>=
+           r2->source.priority)
+        {
+          add_constraint(
+            equation,
+            implies_exprt(and_exprt(before(r1, r2), r1->guard, r2->guard), last(r1, r2)),
+            "rs-irq",
+            r1->source);
+        }
+
+        if(r1->source.priority<=
+           r2->source.priority)
+        {
+          add_constraint(
+            equation,
+            implies_exprt(and_exprt(not_exprt(before(r1, r2)), r1->guard, r2->guard), last(r2, r1)),
+            "rs-irq",
+            r1->source);
+        }
+      }
     }
   }
 }
