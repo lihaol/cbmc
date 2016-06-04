@@ -236,7 +236,6 @@ void memory_model_interruptt::nested_isr_for_external_reads(
 
         const event_it r1=*r_it1;
         const event_it r2=*r_it2;
-     
 
 	if(r1->source.priority>=
            r2->source.priority)
@@ -253,7 +252,7 @@ void memory_model_interruptt::nested_isr_for_external_reads(
         {
           add_constraint(
             equation,
-            implies_exprt(and_exprt(not_exprt(before(r1, r2)), r1->guard, r2->guard), last(r2, r1)),
+            implies_exprt(and_exprt(before(r2, r1), r1->guard, r2->guard), last(r2, r1)),
             "rs-irq",
             r1->source);
         }
