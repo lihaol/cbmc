@@ -247,7 +247,9 @@ void memory_model_interruptt::nested_isr_for_external_reads(
         {
           add_constraint(
             equation,
-            implies_exprt(and_exprt(before(r1, r2), r1->guard, r2->guard), last(r1, r2)),
+            implies_exprt(
+              and_exprt(before(r1, r2), r1->guard, r2->guard),
+              last(r1, r2)),
             "rs-irq",
             r1->source);
         }
@@ -257,7 +259,9 @@ void memory_model_interruptt::nested_isr_for_external_reads(
         {
           add_constraint(
             equation,
-            implies_exprt(and_exprt(before(r2, r1), r1->guard, r2->guard), last(r2, r1)),
+            implies_exprt(
+              and_exprt(before(r2, r1), r1->guard, r2->guard),
+              last(r2, r1)),
             "rs-irq",
             r1->source);
         }
