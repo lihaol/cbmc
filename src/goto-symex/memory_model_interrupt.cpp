@@ -70,7 +70,8 @@ void memory_model_interruptt::read_from(symex_target_equationt &equation)
     { 
       // must use before(w, r) instead of c_it->second 
       exprt cond=implies_exprt(
-        and_exprt(before(w, r), w->guard, r->guard), last(w, r));
+        and_exprt(before(w, r), w->guard, r->guard), 
+        last(w, r));
       add_constraint(
         equation, cond, "rf-irq", r->source);
     }
@@ -108,7 +109,9 @@ void memory_model_interruptt::write_serialization_external(
     {
       add_constraint(
         equation,
-        implies_exprt(and_exprt(s, w1->guard, w2->guard), last(w1, w2)),
+        implies_exprt(
+          and_exprt(s, w1->guard, w2->guard), 
+          last(w1, w2)),
         "ws-irq",
         w1->source);
     }
@@ -118,7 +121,9 @@ void memory_model_interruptt::write_serialization_external(
     {
       add_constraint(
         equation,
-        implies_exprt(and_exprt(not_exprt(s), w1->guard, w2->guard), last(w2, w1)),
+        implies_exprt(
+          and_exprt(not_exprt(s), w1->guard, w2->guard), 
+          last(w2, w1)),
         "ws-irq",
         w1->source);
     }
@@ -297,4 +302,3 @@ exprt memory_model_interruptt::last(const event_it &from, const event_it &to)
 
   return conjunction(pty_operands);
 }
-
