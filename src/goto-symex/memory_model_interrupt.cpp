@@ -14,6 +14,205 @@ Author: Lihao Liang, lihao.liang@cs.ox.ac.uk
 
 /*******************************************************************\
 
+Function: memory_model_interrupt_tot::operator()
+
+  Inputs:
+
+ Outputs:
+
+ Purpose:
+
+\*******************************************************************/
+
+void memory_model_interrupt_tot::operator()(symex_target_equationt &equation)
+{
+  print(8, "Adding interrupt constraints");
+
+  build_event_lists(equation);
+  build_clock_type(equation);
+  build_per_thread_map(equation, per_thread_map);
+
+  program_order(equation);
+  read_from(equation);
+  write_serialization_external(equation);
+  from_read(equation);
+
+  nested_isr(equation);
+}
+
+/*******************************************************************\
+
+Function: memory_model_interrupt_tot::nested_isr()
+
+  Inputs:
+
+ Outputs:
+
+ Purpose:
+
+\*******************************************************************/
+
+#if 0
+void memory_model_interrupt_tot::nested_isr(
+  symex_target_equationt &equation)
+{
+  for(per_thread_mapt::const_iterator
+     t_it1=per_thread_map.begin();
+     t_it1!=per_thread_map.end();
+     ++t_it1)
+  {
+    const event_it event1=*(t_it1->second.begin());
+    per_thread_mapt::const_iterator next_t=t_it1;
+    next_t++;
+
+    for(per_thread_mapt::const_iterator t_it2=next_t;
+        t_it2!=per_thread_map.end();
+        ++t_it2)
+    {
+      const event_it event2=*(t_it2->second.begin());
+
+      if(event1->source.priority>=
+         event2->source.priority)
+      {
+        for(event_listt::const_iterator
+            e_it2=t_it2->second.begin();
+            e_it2!=t_it2->second.end();
+            ++e_it2)
+        {
+          const event_it e2=*e_it2;
+
+          exprt cond=
+            implies_exprt(
+              and_exprt(before(event1, e2), event1->guard, e2->guard),
+              last(event1, e2));
+          add_constraint(equation, cond, "nested-isr", e2->source);
+        }
+      }
+
+      if(event1->source.priority<=
+         event2->source.priority)
+      {
+        for(event_listt::const_iterator
+            e_it1=t_it1->second.begin();
+            e_it1!=t_it1->second.end();
+            ++e_it1)
+        {
+          const event_it e1=*e_it1;
+
+          exprt cond=
+            implies_exprt(
+              and_exprt(before(event2, e1), e1->guard, event2->guard),
+              last(event2, e1));
+          add_constraint(equation, cond, "nested-isr", e1->source);
+        }
+      }
+    }
+  }
+}
+#endif
+
+void memory_model_interrupt_tot::nested_isr(
+  symex_target_equationt &equation)
+{
+  for(per_thread_mapt::const_iterator
+     t_it1=per_thread_map.begin();
+     t_it1!=per_thread_map.end();
+     ++t_it1)
+  {
+    const event_it event1=*(t_it1->second.begin());
+    per_thread_mapt::const_iterator next_t=t_it1;
+    next_t++;
+
+    for(per_thread_mapt::const_iterator t_it2=next_t;
+        t_it2!=per_thread_map.end();
+        ++t_it2)
+    {
+      const event_it event2=*(t_it2->second.begin());
+
+      // we need to go through all events
+      // instead of only the first one
+      // as their guards may differ
+      for(event_listt::const_iterator
+          e_it1=t_it1->second.begin();
+          e_it1!=t_it1->second.end();
+          ++e_it1)
+      {
+        #if 0
+        if(!(*e_it1)->is_shared_write() &&
+           !(*e_it1)->is_shared_read()  &&
+           !(*e_it1)->is_spawn())
+          continue;
+        #endif
+
+        const event_it e1=*e_it1;
+
+        for(event_listt::const_iterator
+            e_it2=t_it2->second.begin();
+            e_it2!=t_it2->second.end();
+            ++e_it2)
+        {
+          #if 0
+          if(!(*e_it2)->is_shared_write() &&
+             !(*e_it2)->is_shared_read()  &&
+             !(*e_it2)->is_spawn())
+            continue;
+          #endif
+
+          const event_it e2=*e_it2;
+
+          if(event1->source.priority>=
+             event2->source.priority)
+          {
+             exprt cond=
+               implies_exprt(
+                 and_exprt(before(e1, e2), e1->guard, e2->guard),
+                 last(e1, e2));
+             add_constraint(equation, cond, "nested-isr", e1->source);
+          }
+
+          if(event1->source.priority<=
+             event2->source.priority)
+          {
+             exprt cond=
+               implies_exprt(
+                 and_exprt(before(e2, e1), e1->guard, e2->guard),
+                 last(e2, e1));
+             add_constraint(equation, cond, "nested-isr", e2->source);
+          }
+        }
+      }
+    }
+  }
+}
+
+/*******************************************************************\
+
+Function: memory_model_interrupt_tot::last
+
+  Inputs:
+
+ Outputs:
+
+ Purpose: compute a before constraint from the last event of the thread
+          which the from event is in to the to event
+
+\*******************************************************************/
+
+exprt memory_model_interrupt_tot::last(const event_it &from, const event_it &to)
+{
+  const event_listt &events=per_thread_map[from->source.thread_nr];
+  exprt::operandst pty_operands;
+  pty_operands.reserve(1);
+
+  event_listt::const_iterator e_it=--events.end();
+  assert(std::find(events.begin(), events.end(), from)!=events.end());
+
+  pty_operands.push_back(before(*e_it, to));
+  return conjunction(pty_operands);
+}
+
+/*******************************************************************\
+
 Function: memory_model_interruptt::operator()
 
   Inputs: 
@@ -206,7 +405,7 @@ Function: memory_model_interruptt::last
 
  Outputs:
 
- Purpose: compute a before constraint from the last event of the thread 
+ Purpose: compute a before constraint from the last event of the thread
           which the from event is in to the to event
 
 \*******************************************************************/

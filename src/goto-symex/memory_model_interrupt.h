@@ -31,5 +31,21 @@ private:
   exprt last(const event_it &from, const event_it &to);
 };
 
-#endif
+class memory_model_interrupt_tot:public memory_model_sct
+{
+public:
+  inline explicit memory_model_interrupt_tot(const namespacet &_ns):
+    memory_model_sct(_ns)
+  {
+  }
 
+  virtual void operator()(symex_target_equationt &equation);
+
+protected:
+  void nested_isr(symex_target_equationt &equation);
+
+private:
+  exprt last(const event_it &from, const event_it &to);
+};
+
+#endif
