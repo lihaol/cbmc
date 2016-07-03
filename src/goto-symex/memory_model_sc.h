@@ -44,6 +44,8 @@ protected:
   typedef std::map<
     std::pair<event_it, event_it>, std::pair<exprt, exprt> > ww_pairst;
   ww_pairst ww_pairs;
+
+  per_thread_mapt per_thread_map;
 };
 
 #endif

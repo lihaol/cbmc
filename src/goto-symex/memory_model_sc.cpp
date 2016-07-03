@@ -29,6 +29,7 @@ void memory_model_sct::operator()(symex_target_equationt &equation)
 
   build_event_lists(equation);
   build_clock_type(equation);
+  build_per_thread_map(equation, per_thread_map);
   
   read_from(equation);
   write_serialization_external(equation);
@@ -216,8 +217,8 @@ Function: memory_model_sct::program_order
 void memory_model_sct::program_order(
   symex_target_equationt &equation)
 {
-  per_thread_mapt per_thread_map;
-  build_per_thread_map(equation, per_thread_map);
+  //per_thread_mapt per_thread_map;
+  //build_per_thread_map(equation, per_thread_map);
 
   thread_spawn(equation, per_thread_map);
   
