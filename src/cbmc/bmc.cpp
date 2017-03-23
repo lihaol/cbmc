@@ -426,10 +426,13 @@ safety_checkert::resultt bmct::run(
   else if(mm=="irq")
     memory_model=std::unique_ptr<memory_model_baset>
       (new memory_model_interruptt(ns));
+  else if(mm=="irq-pre")
+    memory_model=std::unique_ptr<memory_model_baset>
+      (new memory_model_interrupt_pret(ns));
   else
   {
     error() << "Invalid memory model " << mm
-            << " -- use one of sc, tso, pso, irq" << eom;
+            << " -- use one of sc, tso, pso, irq, irq-pre" << eom;
     return safety_checkert::ERROR;
   }
 
